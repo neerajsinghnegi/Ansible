@@ -1,0 +1,55 @@
+- hosts: 192.168.43.109
+  tasks:
+  - name: Adding repository
+    yum_repository:
+      name: "docker-ce"
+      description: "docker download" 
+      baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
+      gpgcheck: no
+      enabled: yes
+ 
+  - name: "installing docker-ce..."
+    command: "yum install docker-ce --nobest -y"
+  
+  - name: Downloading  python3
+    package:
+      name:
+          - python36
+
+  - name: Pip installing docker-py dependencies
+    pip:
+      name: docker-py
+    
+  - name: Disable SELinux
+    selinux:
+        state: disabled
+
+  - name: "creating directory for docker..."
+    file: 
+      path: /root/ansible-docker
+      state: directory
+
+  - name: "starting the docker service..."
+    service:
+      name: "docker"
+      state: restarted
+
+  - name: "copying webserver content..."
+    copy:
+      content: "It works..."
+      dest: /root/ansible-docker/index.html
+
+  - name: "downloading docker image...httpd"
+    docker_image:
+      name: "httpd"
+      source: pull
+
+  - name: "launching docker container..."
+    docker_container:
+      name: "web1"
+      image: "httpd"
+      ports: 8012:80
+      state: started
+      volumes:
+      -  /root/ansible-docker/:/usr/local/apache2/htdocs/
+

@@ -1,0 +1,42 @@
+- hosts: webserver
+  tasks:
+  - name: "installling httpd software..."
+    package:
+        name: "httpd"
+        state: present
+
+  - name: "configuring webserver file for Authentication..."
+    replace:
+        path: "/etc/httpd/conf/httpd.conf"
+        regexp: "AllowOverride None"
+        replace: "AllowOverride AuthConfig"
+
+  - name: "copy webserver config content..."
+    copy:
+       content: |
+          authname "Neeraj Website" 
+          authtype basic 
+          authuserfile /etc/www.passwd
+          require valid-user
+       dest: "/var/www/html/.htaccess"
+
+  - name: "installing passlib for user database..."
+    pip:
+       name: "passlib"
+
+  - name: "creating user/password database..."
+    htpasswd:
+      path: "/etc/www.passwd"
+      name: "neeraj"
+      password: "redhat"
+
+  - name: copy webpage to document root...
+    copy:
+        content: "secure page..."
+        dest: /var/www/html/index.html
+
+  - name: "starting webserver services..."
+    service:
+        name: "httpd"
+        state: restarted
+
