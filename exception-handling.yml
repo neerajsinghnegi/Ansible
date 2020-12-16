@@ -1,0 +1,23 @@
+- hosts: 192.168.43.109
+  tasks:
+  - block:
+    - package:
+        name: "httpd"
+        state: present
+
+    - get_url:
+        url: "https://raw.githubusercontent.com/neerajsinghnegi/task1/master/index.html"
+        dest: "/var/www/html/"
+
+    - service:
+        name: "httpd"
+        state: started
+
+    rescue:  
+    - copy:
+        content: "hello hii"
+        dest: "/var/www/html/hello.html"
+
+    always: 
+    - debug:
+        msg: "Hurry! We successfully run the complete ansible-playbook..." 
