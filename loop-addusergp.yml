@@ -1,0 +1,32 @@
+- hosts: 127.0.0.1
+  vars:
+  - grps:
+      - name: "lw12"
+      - name: "negi"
+
+  - userdb:
+      - name: "neeraj"
+        p: "redhat"
+        gp: "lw12"
+
+      - name: "nik"
+        p: "red"
+        gp: "negi"
+
+
+  tasks:
+  - name: checking group exists or not..
+    group:
+      name: "{{ item.name }}" 
+      state: present
+
+    with_items: "{{ grps }}"
+
+  - user:
+      name: "{{ item.name }}"
+      password: "{{ item.p | password_hash('sha512')}}"
+      groups: "{{ item.gp }}"
+
+    with_items: "{{ userdb }}"
+
+
