@@ -3,12 +3,41 @@
   - port_no: "8012"
   - dir: "/var/www/web"
 
+  - localyum:
+    - name: DVD1
+      description: Local DVD1
+      baseurl: "file///dvd/AppStream"
+      gpgcheck: no
+      enabled: yes
+
+    - name: DVD2
+      description: Local DVD2
+      baseurl: "file///dvd/BaseOS"
+      gpgcheck: no
+      enabled: yes 
+
   tasks:
-  - name: Add EPEl repo
+  - name: Creating directory for DVD
+    file:
+      path: /dvd
+      state: directory
+
+  - name: Mounting DVD 
+    mount:
+      src: /dev/cdrom
+      path: /dvd
+      state: present
+      fstype: xfs
+
+  - name: Configuring local Repo
     yum_repository:
-      name: epel
-      description: EPEL YUM repo
-      baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
+      name: "{{ item.name }}"
+      description: "{{ item.description }}"
+      baseurl: "{{ item.baseurl }}"
+      gpgcheck: "{{ item.gpgcheck }}"
+      enabled: "{{ item.enabled }}"
+
+    with_items: "{{ localyum }}"
 
   - name: Installing httpd webserver
     package:
